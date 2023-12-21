@@ -1,0 +1,191 @@
+#include <Servo.h>
+ Servo servo;
+  Servo servo1;
+   int pos1=0; 
+     int pos = 0; 
+     ////// define servo  
+  const int stepX = 2;
+   const int dirX  = 3;
+    const int stepY = 4;
+     const int dirY  = 5;
+      const int stepZ = 6;
+       const int dirZ  = 7;
+        const int stepA = 8;
+         const int dirA  = 10;
+          const int enPin = 12;
+ //////// define steppers 
+const int trigPin = 13;
+ const int echoPin = 30;
+  long duration;
+   int distanceCm, distanceInch;
+    int oldValue = 0 , newValue = 0; 
+    /////// define ultra sonic sensor 
+int LIMIT = 31;
+ /////// define limit switch
+void setup() {
+  servo.attach(9); 
+   servo1.attach(11);
+  pinMode(stepX,OUTPUT);
+   pinMode(dirX,OUTPUT);  /////// SLIDER
+    pinMode(stepY,OUTPUT); 
+     pinMode(dirY,OUTPUT); ////////BOTTOM
+      pinMode(stepZ,OUTPUT);
+       pinMode(dirZ,OUTPUT); //////// ARM1
+        pinMode(stepA,OUTPUT);
+         pinMode(dirA,OUTPUT); ///// ARM2
+           pinMode(enPin,OUTPUT);
+            pinMode(trigPin, OUTPUT);
+             pinMode(echoPin, INPUT);
+               pinMode (LIMIT, INPUT);
+   Serial.begin(9600);
+   digitalWrite(enPin,LOW);  
+}
+
+void loop() {
+  int LI = digitalRead(LIMIT);
+  digitalWrite(trigPin, LOW);
+  delayMicroseconds(2);
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);
+  duration = pulseIn(echoPin, HIGH);
+  distanceCm = duration * 0.0340 / 2;
+  newValue = distanceCm;
+  if(newValue != oldValue)
+  {
+    //Serial.print("Distance: ");
+    Serial.println(distanceCm);
+    //Serial.println(" cm");
+    oldValue = newValue;
+  }
+  delay(1000);
+  ////////////////ultra code
+   if((distanceCm<=10)) 
+  {
+    Serial.println("objecct is detected");
+        
+    for (pos = 0; pos <= 60; pos += 1) { 
+    servo1.write(pos);             
+    delay(15);    
+     Serial.println("moving grepper holder");                    
+  }
+  for (pos = 0; pos <= 180; pos += 1) { 
+    servo.write(pos);
+     Serial.println("opining grepper");             
+    delay(15);                              
+  }
+   if(LI==LOW){
+  digitalWrite(dirX,HIGH); 
+   digitalWrite(stepX, HIGH);
+    delayMicroseconds(4000);
+     digitalWrite(stepX,LOW);
+      delay(1000);
+   Serial.println("moving stepper X slider");
+  } 
+   delay(1000);
+   digitalWrite(dirY,HIGH);
+ for(int x = 0; x < 400; x++) {  
+   Serial.println("moving stepper Y bottom");  
+    digitalWrite(stepY,HIGH);         
+     delayMicroseconds(1000);           
+      digitalWrite(stepY,LOW);          
+       delayMicroseconds(1000);           
+  }
+   delay(1000);
+  digitalWrite(dirZ,HIGH);
+ for(int x = 0; x < 200; x++) {
+   Serial.println("moving stepper Z arm1");
+    digitalWrite(stepZ,HIGH);
+     delayMicroseconds(750);
+      digitalWrite(stepZ,LOW);
+       delayMicroseconds(750);
+  }
+   delay(1000);
+    digitalWrite(dirA,HIGH);
+     Serial.println("moving stepper A arm2");
+   for(int x = 0; x < 100; x++) {
+    digitalWrite(stepA,HIGH);
+     delayMicroseconds(750);
+      digitalWrite(stepA,LOW);
+       delayMicroseconds(750);
+  }
+   delay(1000);
+  //////// SECOND STEP
+   Serial.println("closing the grepper");
+    for (pos = 180; pos >= 0; pos -= 1) {  
+    servo.write(pos);                           
+    delay(15);                                      
+  }
+   for (pos = 60; pos <= 180; pos += 1) { 
+    servo1.write(pos); 
+     Serial.println("moving grepper holder");            
+    delay(15);                              
+  }
+   delay(1000);
+    digitalWrite(dirA,LOW);
+  for(int x = 0; x < 100; x++) {  
+     Serial.println("moving stepper A");      
+    digitalWrite(stepA,HIGH);              
+     delayMicroseconds(750);                  
+      digitalWrite(stepA,LOW);
+       delayMicroseconds(750);
+  }
+   delay(1000);
+   digitalWrite(dirZ,LOW);
+   for(int x = 0; x < 200; x++) {
+     Serial.println("moving stepper Z");
+    digitalWrite(stepZ,HIGH);
+     delayMicroseconds(750); 
+      digitalWrite(stepZ,LOW);
+       delayMicroseconds(750);
+  }
+   delay(1000);
+    if(LI ==HIGH) {
+ digitalWrite(dirX,LOW);
+     Serial.println("moving stepper X slider");
+    digitalWrite(stepX,HIGH);
+     delayMicroseconds(4000);
+      digitalWrite(stepX,LOW);
+       delayMicroseconds(2000);
+  }
+   delay(1000);
+    digitalWrite(dirY,LOW);
+    for(int x = 0; x < 200; x++) {
+       Serial.println("moving stepper Y");      
+    digitalWrite(stepY,HIGH);           
+     delayMicroseconds(1000);           
+      digitalWrite(stepY,LOW);           
+       delayMicroseconds(1000);      
+    }
+    ////////////////// third step
+    delay(1000);
+    digitalWrite(dirZ,HIGH);
+  for(int x = 0; x < 200; x++) {   
+     Serial.println("moving stepper Z");   
+    digitalWrite(stepZ,HIGH);           
+     delayMicroseconds(750);           
+      digitalWrite(stepZ,LOW);           
+       delayMicroseconds(750);            
+  }
+   delay(1000);
+     digitalWrite(dirA,HIGH);
+  for(int x = 0; x < 100; x++) {
+     Serial.println("moving stepper A");
+    digitalWrite(stepA,HIGH);
+     delayMicroseconds(750);
+      digitalWrite(stepA,LOW);
+       delayMicroseconds(750);
+  }
+   delay(1000);
+   for (pos = 100; pos <= 0; pos -= 1) {
+     Serial.println("MOVING GREPPER HOLDER"); 
+    servo1.write(pos);             
+    delay(15);                              
+  }
+  for (pos = 0; pos >= 180; pos += 1) {
+     Serial.println("moving GREPPER");
+    servo.write(pos);              
+    delay(15); 
+     delay(1000);                      
+  }}}
+     
